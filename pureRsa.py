@@ -1,4 +1,5 @@
-import random
+import random,hashlib,math
+from base64 import b64encode,b85decode
 
 class Rsa:
     def __init__(self,bits:int) -> None:
@@ -72,21 +73,30 @@ class Rsa:
             self.d += self.phi
 
     def getPublicKey(self)->tuple:
-        return self.e,self.n
+        return (self.e,self.n)
 
-    def encrypt(self,message:str)->tuple:
+    def encrypt(self,message:str,publicKey:tuple)->tuple:
         array = []
         for char in message:
-            encryptedText = pow(ord(char),self.e,self.n)
+            encryptedText = pow(ord(char),publicKey[0],publicKey[1])
             array.append(encryptedText)
         return tuple(array)
-    
+
     def decrypt(self,array)->str:
         decryptedText = ''
         for integer in array:
             decrypted = pow(integer,self.d,self.n)
             decryptedText += chr(decrypted)
         return decryptedText
+    
+    def signature(self,msg:bytes)->int:
+        h = int.from_bytes(hashlib.sha256(msg).digest(),byteorder='big')
+        sig = pow(h,self.d,self.n)
+        return sig
+    
+    def verify(self,signature,msg)->None:
+        h = int.from_bytes(hashlib.sha256(msg).digest(),byteorder='big')
+        hashSig = pow(signature,self.e,self.n)
 
 class Exploits:
     def __init__(self,bits) -> None:
@@ -142,3 +152,22 @@ class Exploits:
         for i in range(3,self.n):
             if self.n%i == 0:
                 return i
+
+bob = Rsa(1024)
+msg = b'Hello, World!i2jkl;djsafipfo[dasjflk;]'
+h = int.from_bytes(hashlib.sha256(msg).digest(),byteorder='big')
+intMsg = int.from_bytes(msg)
+
+print('Message byte length:',len(msg))
+print('Decimal:',intMsg)
+print('Hex:',msg.hex())
+
+encrypted = pow(intMsg,bob.e,bob.n)
+print('encrypted:',encrypted,'\n')
+sig = pow(encrypted,bob.d,bob.n)
+print('signature',sig,'\n')
+
+i = pow(encrypted,bob.d,bob.n)
+print('decrypted:',i.to_bytes(max(1, math.ceil(i.bit_length() / 8)),'big'))
+
+print(pow(sig,bob.e,bob.n))
