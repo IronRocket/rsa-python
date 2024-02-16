@@ -36,11 +36,14 @@ Given the performance of this implementation,  bit length shouldn't exceed 1024
 from pureRsa import Rsa
 
 bits = 1024
-r = Rsa(bits)
+bob = Rsa(bits)
+alice = Rsa(bits)
 
-cipherText = r.encrypt('Euler is in your closet')
+#Bob encrypted message with alice's public key
+cipherText = bob.encrypt('Euler is in your closet',alice.getPublicKey())
 
-decrypted = r.decrypt(cipherText)
+#Alice decrypts with her private key
+decrypted = alice.decrypt(cipherText)
 
 print(decrypted)
 
@@ -53,15 +56,14 @@ bit length shouldn't exceed 30
 from pureRsa import Rsa,Exploits
 
 bits = 27
-r = Rsa(bits)
+bob = Rsa(bits)
+alice = Rsa(bits)
 
-cipherText = r.encrypt('Euler is in your closet')
+cipherText = bob.encrypt('Hello, World!',alice.getPublicKey())
 
+e,n = alice.getPublicKey()
 
-e,n = r.getPublicKey()
-
-x = Exploits(27)
-
+x = Exploits(bits)
 print('brute forcing...')
 x.bruteForce(e,n)
 print('Successfully found private key')
