@@ -54,6 +54,7 @@ In order for the brute force to work in a reasonable amount of time,
 bit length shouldn't exceed 30
 ```python
 from pureRsa import Rsa,Exploits
+import time
 
 bits = 27
 bob = Rsa(bits)
@@ -65,10 +66,12 @@ e,n = alice.getPublicKey()
 
 x = Exploits(bits)
 print('brute forcing...')
+s = time.perf_counter()
 x.bruteForce(e,n)
+e = time.perf_counter()
 print('Successfully found private key')
 
 
-print(f'Brute Forced decryption = {x.decrypt(cipherText)}')
+print(f'Brute Forced decryption = {x.decrypt(cipherText)} Elasped Time: {e-s} seconds')
 
 ```
